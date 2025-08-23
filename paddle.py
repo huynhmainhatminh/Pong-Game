@@ -1,12 +1,14 @@
 from turtle import Turtle
 
-
 class Paddle(Turtle):
-
     def __init__(self, position):
         super().__init__()
         self.shape("square")
-        self.color("white")
+        # Gán màu dựa trên vị trí
+        if position[0] < 0:  # Paddle trái (x = -350)
+            self.color("yellow")
+        else:  # Paddle phải (x = 350)
+            self.color("red")
         self.shapesize(stretch_wid=5, stretch_len=1)
         self.penup()
         self.goto(position)
