@@ -10,10 +10,14 @@ screen.setup(width=800, height=600)
 screen.title("PONG - The Game")
 screen.tracer(0)
 
+# Nhập tên người chơi
+left_player_name = screen.textinput("Player Name", "Enter name for Left Player (W/S keys):") or "Left Player"
+right_player_name = screen.textinput("Player Name", "Enter name for Right Player (Up/Down keys):") or "Right Player"
+
 r_paddle = Paddle((350, 0))
 l_paddle = Paddle((-350, 0))
 ball = Ball()
-score = Score()
+score = Score(left_player_name, right_player_name)  # Truyền tên người chơi vào Score
 
 # Tạo đối tượng Turtle để vẽ đường sọc trắng ở giữa
 center_line = Turtle()
@@ -21,18 +25,18 @@ center_line.hideturtle()
 center_line.color("white")
 center_line.pensize(5)
 center_line.penup()
-center_line.goto(0, 300)  # Bắt đầu từ đỉnh màn hình
+center_line.goto(0, 300)
 
 # Vẽ đường nét đứt
 def draw_dashed_line():
-    center_line.clear()  # Xóa đường cũ trước khi vẽ lại
+    center_line.clear()
     center_line.penup()
-    center_line.goto(0, 300)  # Đặt lại vị trí đầu
-    for _ in range(15):  # Vẽ 15 đoạn nét đứt
+    center_line.goto(0, 300)
+    for _ in range(15):
         center_line.pendown()
-        center_line.sety(center_line.ycor() - 20)  # Vẽ đoạn dài 20 pixel
+        center_line.sety(center_line.ycor() - 20)
         center_line.penup()
-        center_line.sety(center_line.ycor() - 20)  # Bỏ qua 20 pixel
+        center_line.sety(center_line.ycor() - 20)
 
 # Biến để theo dõi trạng thái phím
 r_paddle_up = False
@@ -116,10 +120,16 @@ while game_is_on:
     if ball.xcor() > 380:
         ball.reset()
         score.l_point()
+        # Kiểm tra người thắng
+        if score.check_winner():
+            game_is_on = False
 
     # Kiểm tra khi bóng vượt qua paddle trái
     if ball.xcor() < -380:
         ball.reset()
         score.r_point()
+        # Kiểm tra người thắng
+        if score.check_winner():
+            game_is_on = False
 
 screen.exitonclick()
