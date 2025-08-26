@@ -56,9 +56,9 @@ while running:
 
     # Kiểm tra va chạm paddle
     if pygame.sprite.collide_rect(ball, left_paddle) and ball.speed_x < 0:
-        ball.bounce()
+        ball.bounce(left_paddle)
     if pygame.sprite.collide_rect(ball, right_paddle) and ball.speed_x > 0:
-        ball.bounce()
+        ball.bounce(right_paddle)
 
     # Kiểm tra điểm
     if ball.rect.left <= 0:
