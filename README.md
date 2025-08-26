@@ -1,5 +1,8 @@
 # Pong-Game
 
+## Video Demo
+
+https://github.com/user-attachments/assets/9da71b65-cf00-4006-9f64-f13d92c50680
 
 ## Danh sách thành viên đóng góp cho dự án
 | STT | Họ và Tên | MSSV | Vai Trò |
