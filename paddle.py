@@ -1,22 +1,18 @@
-from turtle import Turtle
+import pygame
 
-class Paddle(Turtle):
-    def __init__(self, position):
+class Paddle(pygame.sprite.Sprite):
+    def __init__(self, x, y, color):
         super().__init__()
-        self.shape("square")
-        # Gán màu dựa trên vị trí
-        if position[0] < 0:  # Paddle trái (x = -350)
-            self.color("yellow")
-        else:  # Paddle phải (x = 350)
-            self.color("red")
-        self.shapesize(stretch_wid=5, stretch_len=1)
-        self.penup()
-        self.goto(position)
+        self.image = pygame.Surface([10, 100])  # Paddle 10x100 px
+        self.image.fill(color)
+        self.rect = self.image.get_rect()
+        self.rect.center = [x, y]
+        self.speed = 7
 
-    def up(self):
-        new_y = self.ycor() + 20
-        self.goto(self.xcor(), new_y)
+    def move_up(self):
+        if self.rect.top > 0:
+            self.rect.y -= self.speed
 
-    def down(self):
-        new_y = self.ycor() - 20
-        self.goto(self.xcor(), new_y)
+    def move_down(self, screen_height):
+        if self.rect.bottom < screen_height:
+            self.rect.y += self.speed
