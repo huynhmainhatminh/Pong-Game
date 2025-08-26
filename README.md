@@ -15,6 +15,14 @@ pip install pygame
 pip install PodSixNet
 ```
 
+# Multiplayer
+
+```bash
+python server.py
+
+python client.py
+```
+
 ## Video Demo
 
 https://github.com/user-attachments/assets/9da71b65-cf00-4006-9f64-f13d92c50680
