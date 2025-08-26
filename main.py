@@ -1,135 +1,91 @@
-from turtle import Screen, Turtle
+import pygame
+import sys
 from paddle import Paddle
 from ball import Ball
 from score import Score
-import time
 
-screen = Screen()
-screen.bgcolor("black")
-screen.setup(width=800, height=600)
-screen.title("PONG - The Game")
-screen.tracer(0)
+pygame.init()
 
-# Nhập tên người chơi
-left_player_name = screen.textinput("Player Name", "Enter name for Left Player (W/S keys):") or "Left Player"
-right_player_name = screen.textinput("Player Name", "Enter name for Right Player (Up/Down keys):") or "Right Player"
+# Màn hình
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("PONG - PyGame Edition")
+clock = pygame.time.Clock()
 
-r_paddle = Paddle((350, 0))
-l_paddle = Paddle((-350, 0))
-ball = Ball()
-score = Score(left_player_name, right_player_name)  # Truyền tên người chơi vào Score
+# Nhập tên người chơi (console input)
+left_player = input("Enter name for Left Player (W/S): ") or "Left Player"
+right_player = input("Enter name for Right Player (Up/Down): ") or "Right Player"
 
-# Tạo đối tượng Turtle để vẽ đường sọc trắng ở giữa
-center_line = Turtle()
-center_line.hideturtle()
-center_line.color("white")
-center_line.pensize(5)
-center_line.penup()
-center_line.goto(0, 300)
+# Paddle & Ball
+left_paddle = Paddle(50, SCREEN_HEIGHT//2, "yellow")
+right_paddle = Paddle(SCREEN_WIDTH-50, SCREEN_HEIGHT//2, "red")
+ball = Ball(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-# Vẽ đường nét đứt
-def draw_dashed_line():
-    center_line.clear()
-    center_line.penup()
-    center_line.goto(0, 300)
-    for _ in range(15):
-        center_line.pendown()
-        center_line.sety(center_line.ycor() - 20)
-        center_line.penup()
-        center_line.sety(center_line.ycor() - 20)
+# Nhóm sprite
+all_sprites = pygame.sprite.Group()
+all_sprites.add(left_paddle, right_paddle, ball)
 
-# Biến để theo dõi trạng thái phím
-r_paddle_up = False
-r_paddle_down = False
-l_paddle_up = False
-l_paddle_down = False
+# Score
+score = Score(left_player, right_player)
 
-# Hàm xử lý khi nhấn phím
-def r_paddle_up_press():
-    global r_paddle_up
-    r_paddle_up = True
+# Vẽ line giữa sân
+def draw_center_line():
+    for y in range(0, SCREEN_HEIGHT, 40):
+        pygame.draw.rect(screen, (255,255,255), (SCREEN_WIDTH//2 - 2, y, 4, 20))
 
-def r_paddle_down_press():
-    global r_paddle_down
-    r_paddle_down = True
+# Game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
 
-def l_paddle_up_press():
-    global l_paddle_up
-    l_paddle_up = True
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w]:
+        left_paddle.move_up()
+    if keys[pygame.K_s]:
+        left_paddle.move_down(SCREEN_HEIGHT)
+    if keys[pygame.K_UP]:
+        right_paddle.move_up()
+    if keys[pygame.K_DOWN]:
+        right_paddle.move_down(SCREEN_HEIGHT)
 
-def l_paddle_down_press():
-    global l_paddle_down
-    l_paddle_down = True
+    # Update ball
+    ball.update(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-# Hàm xử lý khi thả phím
-def r_paddle_up_release():
-    global r_paddle_up
-    r_paddle_up = False
+    # Kiểm tra va chạm paddle
+    if pygame.sprite.collide_rect(ball, left_paddle) and ball.speed_x < 0:
+        ball.bounce()
+    if pygame.sprite.collide_rect(ball, right_paddle) and ball.speed_x > 0:
+        ball.bounce()
 
-def r_paddle_down_release():
-    global r_paddle_down
-    r_paddle_down = False
+    # Kiểm tra điểm
+    if ball.rect.left <= 0:
+        score.add_right()
+        ball.reset(SCREEN_WIDTH, SCREEN_HEIGHT)
+    if ball.rect.right >= SCREEN_WIDTH:
+        score.add_left()
+        ball.reset(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-def l_paddle_up_release():
-    global l_paddle_up
-    l_paddle_up = False
+    # Vẽ
+    screen.fill("black")
+    draw_center_line()
+    all_sprites.draw(screen)
+    score.draw(screen, SCREEN_WIDTH)
 
-def l_paddle_down_release():
-    global l_paddle_down
-    l_paddle_down = False
+    # Kiểm tra thắng
+    winner = score.check_winner()
+    if winner:
+        font = pygame.font.SysFont("Courier", 50, bold=True)
+        text = font.render(winner, True, (255, 255, 0))
+        screen.blit(text, (SCREEN_WIDTH//2 - text.get_width()//2, SCREEN_HEIGHT//2))
+        pygame.display.flip()
+        pygame.time.wait(3000)
+        running = False
 
-# Gán phím
-screen.listen()
-screen.onkeypress(r_paddle_up_press, "Up")
-screen.onkeypress(r_paddle_down_press, "Down")
-screen.onkeyrelease(r_paddle_up_release, "Up")
-screen.onkeyrelease(r_paddle_down_release, "Down")
-screen.onkeypress(l_paddle_up_press, "w")
-screen.onkeypress(l_paddle_down_press, "s")
-screen.onkeyrelease(l_paddle_up_release, "w")
-screen.onkeyrelease(l_paddle_down_release, "s")
+    pygame.display.flip()
+    clock.tick(60)
 
-game_is_on = True
-while game_is_on:
-    time.sleep(ball.move_speed)
-    screen.update()
-    ball.move()
-
-    # Vẽ đường nét đứt ở giữa
-    draw_dashed_line()
-
-    # Di chuyển paddle dựa trên trạng thái phím
-    if r_paddle_up and r_paddle.ycor() < 250:
-        r_paddle.up()
-    if r_paddle_down and r_paddle.ycor() > -250:
-        r_paddle.down()
-    if l_paddle_up and l_paddle.ycor() < 250:
-        l_paddle.up()
-    if l_paddle_down and l_paddle.ycor() > -250:
-        l_paddle.down()
-
-    # Kiểm tra va chạm với trần hoặc sàn
-    if ball.ycor() > 280 or ball.ycor() < -280:
-        ball.bounce_y()
-
-    # Kiểm tra va chạm với paddle
-    if ball.distance(r_paddle) < 50 and ball.xcor() > 320 or ball.distance(l_paddle) < 50 and ball.xcor() < -320:
-        ball.bounce_x()
-
-    # Kiểm tra khi bóng vượt qua paddle phải
-    if ball.xcor() > 380:
-        ball.reset()
-        score.l_point()
-        # Kiểm tra người thắng
-        if score.check_winner():
-            game_is_on = False
-
-    # Kiểm tra khi bóng vượt qua paddle trái
-    if ball.xcor() < -380:
-        ball.reset()
-        score.r_point()
-        # Kiểm tra người thắng
-        if score.check_winner():
-            game_is_on = False
-
-screen.exitonclick()
+pygame.quit()
+sys.exit()
