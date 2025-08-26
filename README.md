@@ -1,5 +1,20 @@
 # Pong-Game
 
+## Ngôn ngữ lập trình
+- Python 3.11
+
+## Thư viện
+- PyGame
+- PodSixNet
+
+# Cài đặt thư viện
+
+```bash
+pip install pygame
+
+pip install PodSixNet
+```
+
 ## Video Demo
 
 https://github.com/user-attachments/assets/9da71b65-cf00-4006-9f64-f13d92c50680
