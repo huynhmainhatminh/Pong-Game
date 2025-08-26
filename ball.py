@@ -1,39 +1,34 @@
-from turtle import Turtle
+import pygame
+import random
 
-class Ball(Turtle):
-
-    def __init__(self):
+class Ball(pygame.sprite.Sprite):
+    def __init__(self, screen_width, screen_height):
         super().__init__()
-        self.shape("square")
-        self.color("orange")  # Thay đổi màu từ "white" thành "orange"
-        self.penup()
-        self.x_move = 5
-        self.y_move = 5
-        self.move_speed = 0.05
-        self.speed_increment = 0.5
-        self.max_speed = 15
+        self.image = pygame.Surface([20, 20])
+        self.image.fill("orange")
+        self.rect = self.image.get_rect()
+        self.rect.center = [screen_width//2, screen_height//2]
+        self.speed_x = random.choice([-5, 5])
+        self.speed_y = random.choice([-5, 5])
+        self.speed_increment = 1.05
+        self.max_speed = 12
 
-    def move(self):
-        new_x = self.xcor() + self.x_move
-        new_y = self.ycor() + self.y_move
-        self.goto(new_x, new_y)
+    def update(self, screen_width, screen_height):
+        self.rect.x += self.speed_x
+        self.rect.y += self.speed_y
 
-    def bounce_y(self):
-        self.y_move *= -1
+        # Va chạm trần/sàn
+        if self.rect.top <= 0 or self.rect.bottom >= screen_height:
+            self.speed_y *= -1
 
-    def bounce_x(self):
-        current_speed = abs(self.x_move)
-        if current_speed < self.max_speed:
-            new_speed = current_speed + self.speed_increment
-        else:
-            new_speed = self.max_speed
-        self.x_move = -new_speed if self.x_move > 0 else new_speed
-        current_y_speed = abs(self.y_move)
-        if current_y_speed < self.max_speed:
-            self.y_move = - (current_y_speed + self.speed_increment) if self.y_move < 0 else (current_y_speed + self.speed_increment)
+    def bounce(self):
+        self.speed_x = -self.speed_x
+        if abs(self.speed_x) < self.max_speed:
+            self.speed_x = int(self.speed_x * self.speed_increment)
+        if abs(self.speed_y) < self.max_speed:
+            self.speed_y = int(self.speed_y * self.speed_increment)
 
-    def reset(self):
-        self.goto(0, 0)
-        self.x_move = 5 if self.x_move > 0 else -5
-        self.y_move = 5 if self.y_move > 0 else -5
-        self.bounce_x()
+    def reset(self, screen_width, screen_height):
+        self.rect.center = [screen_width//2, screen_height//2]
+        self.speed_x *= -1
+        self.speed_y = random.choice([-5, 5])
